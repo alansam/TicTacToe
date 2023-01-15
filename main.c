@@ -13,8 +13,6 @@
 #define NUM_COLS 5
 #define NUM_CELLS 9
 
-#define cint(n) n-'0'
-
 void instruction(void);
 void initialize_attrs(void);
 void display_board(void);
