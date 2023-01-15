@@ -19,12 +19,12 @@ void instruction(void);
 void initialize_attrs(void);
 void display_board(void);
 void initialize_board(void);
-int * allocate_position(char ch);
-bool is_valid_pos(int row, int col);
+size_t * allocate_position(char ch);
+bool is_valid_pos(size_t row, size_t col);
 void ai_play(void);
 void play(void);
-bool cmp_cell_r(int r, int c1, int c2, int c3);
-bool cmp_cell_c(int c, int r1, int r2, int r3);
+bool cmp_cell_r(size_t r, size_t c1, size_t c2, size_t c3);
+bool cmp_cell_c(size_t c, size_t r1, size_t r2, size_t r3);
 bool cmp_cell_diag(void);
 void check_win_status(void);
 
@@ -40,7 +40,7 @@ static
 char ch;
 
 static
-int space, player_score, ai_score, ai_win_count, player_win_count;
+int space;
 
 /*
  *  MARK:  main()
@@ -50,6 +50,7 @@ int main() {
   instruction();
   play();
   display_board();
+
   return 0;
 }
 
@@ -65,9 +66,9 @@ void instruction(void) {
     { '7', '|', '8', '|', '9', },
   };
 
-  for (int i = 0; i < NUM_ROWS; i++) {
+  for (size_t i = 0; i < NUM_ROWS; i++) {
     printf("%35s", " ");
-    for (int j = 0; j < NUM_COLS; j++) {
+    for (size_t j = 0; j < NUM_COLS; j++) {
       printf("%c", board_temp[i][j]);
     }
     putchar('\n');
@@ -79,9 +80,8 @@ void instruction(void) {
  *  MARK:  initialize_board()
  */
 void initialize_board(void) {
-  int i, j;
-  for (i = 0; i < NUM_ROWS - 1; i++) {
-    for (j = 0; j < NUM_COLS; j++) {
+  for (size_t i = 0; i < NUM_ROWS - 1; i++) {
+    for (size_t j = 0; j < NUM_COLS; j++) {
       if (j % 2 == 0) {
         board[i][j] = '_';
       }
@@ -100,15 +100,14 @@ void initialize_board(void) {
  */
 void initialize_attrs(void) {
   space = 8;
-  player_score = ai_score = ai_win_count = player_win_count = 0;
 }
 
 /*
  *  MARK:  display_board()
  */
 void display_board(void) {
-  for (int i = 0; i < NUM_ROWS; i++) {
-    for (int j = 0; j < NUM_COLS; j++) {
+  for (size_t i = 0; i < NUM_ROWS; i++) {
+    for (size_t j = 0; j < NUM_COLS; j++) {
       printf("%c", board[i][j]);
     }
     putchar('\n');
@@ -119,27 +118,30 @@ void display_board(void) {
 /*
  *  MARK:  allocate_position()
  */
-int * allocate_position(char ch) {
-  static int position[2];
-  int row, col;
+size_t * allocate_position(char ch) {
+  static size_t position[2];
+  size_t row, col;
 
   switch(ch) {
     case '1':
     case '2':
     case '3':
-      row = 0; col = 2*(ch-'1');
+      row = 0;
+      col = 2 * (ch - '1');
       break;
 
     case '4':
     case '5':
     case '6':
-      row = 1; col = 2*(ch-'4');
+      row = 1;
+      col = 2 * (ch - '4');
       break;
 
     case '7':
     case '8':
     case '9':
-      row = 2; col = 2*(ch-'7');
+      row = 2;
+      col = 2 * (ch - '7');
       break;
   }
 
@@ -152,7 +154,7 @@ int * allocate_position(char ch) {
 /*
  *  MARK:  is_valid_pos()
  */
-bool is_valid_pos(int row, int col) {
+bool is_valid_pos(size_t row, size_t col) {
   if (board[row][col] == '_' || board[row][col] == ' ') {
     return true;
   }
@@ -165,9 +167,9 @@ bool is_valid_pos(int row, int col) {
 void ai_play(void) {
   char avilable_moves[] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', };
   char move = avilable_moves[rand() % NUM_CELLS];
-  int * pos = allocate_position(move);
-  int row = pos[0];
-  int col = pos[1];
+  size_t * pos = allocate_position(move);
+  size_t row = pos[0];
+  size_t col = pos[1];
 
   while (!is_valid_pos(row, col) && space >= 0) {
     move = avilable_moves[rand() % NUM_CELLS];
@@ -189,7 +191,7 @@ void ai_play(void) {
 void play(void) {
   initialize_attrs();
   initialize_board();
-  int row, col, * pos;
+  size_t row, col, * pos;
   int src;
 
   while (space >= 0) {
@@ -217,7 +219,7 @@ void play(void) {
 /*
  *  MARK:  cmp_cell_r()
  */
-bool cmp_cell_r(int r, int c1, int c2, int c3) {
+bool cmp_cell_r(size_t r, size_t c1, size_t c2, size_t c3) {
   return (board[r][c1] == board[r][c2] &&
           board[r][c2] == board[r][c3]);
 }
@@ -225,7 +227,7 @@ bool cmp_cell_r(int r, int c1, int c2, int c3) {
 /*
  *  MARK:  cmp_cell_c()
  */
-bool cmp_cell_c(int c, int r1, int r2, int r3) {
+bool cmp_cell_c(size_t c, size_t r1, size_t r2, size_t r3) {
   return (board[r1][c] == board[r2][c] &&
           board[r2][c] == board[r3][c]);
 }
@@ -248,8 +250,6 @@ bool cmp_cell_diag(void) {
 void check_win_status(void) {
   int src;
   char choice;
-  [[maybe_unused]] int row;
-  [[maybe_unused]] int col;
   char winner = ' ';
 
   if (cmp_cell_r(0, 0, 2, 4)) {
@@ -276,7 +276,7 @@ void check_win_status(void) {
 
   if (winner == 'X') {
     printf("AI won!");
-    printf("Do you want to continue (y/n)");
+    printf("Do you want to continue (y/n) ");
     src = scanf("%c", &choice);
     getchar();
     if (toupper(choice) == 'Y') {
@@ -288,7 +288,7 @@ void check_win_status(void) {
   }
   else if (winner == 'O') {
     printf("Player won\n");
-    printf("Do you want to continue (y/n)");
+    printf("Do you want to continue (y/n) ");
     src = scanf("%c", &choice);
     getchar();
     if (toupper(choice) == 'Y') {
